@@ -1,0 +1,6 @@
+build
+FixFlashUnit.spec
+test.txt
+.vscode
+logs/*
+example.py
