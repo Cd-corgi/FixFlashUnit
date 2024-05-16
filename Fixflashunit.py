@@ -186,8 +186,8 @@ def main():
                 print("Starting the fixing process ...")
                 setTimeout(2.5)
                 os.system("cls")
-                os.system(f"chkdsk /f {unit}:")
-                os.system("cls")
+                os.system(f"chkdsk /F {unit}:")
+                key2conti()
                 pathTarget = f"{unit}:\\"
                 validatePath(unit, pathTarget)
                 key2conti()
