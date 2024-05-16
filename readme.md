@@ -1,10 +1,6 @@
-<center>
-
 # ⚙ FixFlashUnit 🔨
-### Alpha v1.0.2
-### By cd-corgi
 
-</center>
+### Alpha v1.0.2 - By cd-corgi
 
 # How it works?
 
