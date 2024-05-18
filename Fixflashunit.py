@@ -1,8 +1,12 @@
 from ctypes import *
 import os
+import ctypes
+import string
+import shutil
 import readchar as key
 import time
 import subprocess
+from bitmath import Byte
 from platform import system
 
 
@@ -60,26 +64,49 @@ def verifyPython():
         os.system("exit()")
         return
 
+# (Windows) Detect all removable drives in Windows
 
-# Validate the path target
-def validatePath(un: str, pat: str) -> bool:
+def detect_rm_devices():
     try:
-        if "/" in pat:
-            raise ValueError("The following path has illegal characters (\\ or /)")
-            key2conti()
-        else:
-            os.chdir(pat)
-            print("The drive is accesible now!")
-    except FileNotFoundError:
-        print(f"The drive {un}: couldn't be found!")
-        return
-    except PermissionError:
-        print(f"The drive {un}: has not enough permissions!")
-        return
-    except ValueError as e:
-        print(f"The drive {un}: {e}")
-        return
+        wmi = ctypes.windll.kernel32.GetLogicalDrives()
+        all_drives = [letter for i, letter in enumerate(string.ascii_uppercase) if wmi & (1 << i)]
+        rm_ones = [letter + ":\\" for letter in all_drives if ctypes.windll.kernel32.GetDriveTypeW(letter + ":") == 2]
+        return rm_ones
+    except Exception as e:
+        print(e)
+        return None
 
+# (Windows) get details of the mounted drives
+
+def getDetailsDrives(driveList: list):
+    detailedList = []
+    try:
+        for ll in driveList:
+            drv = shutil.disk_usage(ll)
+            drvByte = Byte(drv.total)
+            KB = 1024
+            MB = KB ** 2
+            GB = KB ** 3
+            TB = KB ** 4
+            if drvByte < KB:
+                detailedList.append(f"{ll}{"."*15}{drv} Bytes")
+            elif drvByte < MB:
+                drvF = f"{drvByte / KB}"
+                detailedList.append(f"{ll}{"."*15}{drvF:.5} KB")
+            elif drvByte < GB:
+                drvF = f"{drvByte / MB}"
+                detailedList.append(f"{ll}{"."*15}{drvF:.5} MB")
+            elif drvByte < TB:
+                drvF = f"{drvByte / GB}"
+                detailedList.append(f"{ll}{"."*15}{drvF:.5} GB")
+            else:
+                drvF = f"{drvByte / TB}"
+                detailedList.append(f"{ll}{"."*15}{drvF:.5} TB")  
+        return detailedList
+    except Exception as e:
+        print(e)
+        os.system("exit()")
+        return
 
 # (Only 4 Linux) Returns a dictionary that it shows every removable drive.
 def detectPathDestiny(unit: str):
@@ -112,7 +139,7 @@ def main():
     unit = ""
     verifyPython()
     so = checkSO()
-    print("FixFlashUnit v 1.0.0 By cd-corgi")
+    print("FixFlashUnit v 1.0.3 By cd-corgi")
     print("")
     print(
         "This is a tiny application that can make an attempt to repair an inaccessible drive.\nBe careful when selecting a drive to repair...\nIf you choose an already functional drive,\nyour files may be formatted (a possibility) But it fulfills its function of repairing and leaving the app functional"
@@ -176,22 +203,46 @@ def main():
         os.system("cls")
         unit = ""
         if is_admin():
-            unit = str(input("Select an unit drive to rescue (ONLY THE DAMAGED ONE): "))
+            devs = list(detect_rm_devices())
+            print("Select an unit drive to rescue (ONLY THE DAMAGED ONE)\n")
+            print("==================================================")
+            print("||\tChoose a drive to repair\t\t||")
+            print("==================================================")
+            print("||\t"+"\t\t||\n||\t".join(getDetailsDrives(devs))+"\t\t||")
+            print("==================================================")
+            unit = str(input("\n>> "))
             if blank(unit):
                 os.system("cls")
                 print("The unit letter should be given!")
                 key2conti()
                 os.system("exit()")
             else:
-                print("Starting the fixing process ...")
-                setTimeout(2.5)
-                os.system("cls")
-                os.system(f"chkdsk /F {unit}:")
-                key2conti()
                 pathTarget = f"{unit}:\\"
-                validatePath(unit, pathTarget)
-                key2conti()
-                os.system("exit()")
+                if pathTarget not in devs:
+                    print("\n==================================================")
+                    print("The selected drive to repair doesn't exists...")
+                    key2conti()
+                    os.system("exit()")
+                else:
+                    print("Starting the fixing process ...")
+                    setTimeout(2.5)
+                    os.system("cls")
+                    os.system(f"chkdsk /F {unit}:")
+                    if os.path.exists(pathTarget):
+                        try:
+                            os.chdir(pathTarget)
+                            os.system(f"start {pathTarget}")
+                            print("The drive is working now!")
+                        except FileNotFoundError as e:
+                            print(f"Error: {e}")
+                            return
+                        except Exception as e:
+                            print(f"Error: {e}")
+                            return
+                    else:
+                        return
+                    key2conti()
+                    os.system("exit()")
         else:
             os.system("cls")
             print("This app only works with administrator!")
