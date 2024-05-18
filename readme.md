@@ -39,11 +39,11 @@ This is a little **Python application** that make the attempt to **rescue/fix** 
 # Changelogs
 
 ``` diff
-+ Works on Linux now!
++ (Windows) It shows a list of removable drives and their respective size.
 
-+ (For linux) You can now write the file system as a target to repair the drive...
++ (Windows) The explorer starts with the selected drive...
 
-+ Requires admin/sudo permissions to work (due to chkdsk/fsck commands)
++ (Windows) Testing the "chkdsk" to this version.
 
-- Removed the Built executable version!
+- (Windows) Removed some bugged/useless functions.
 ```
