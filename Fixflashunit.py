@@ -203,46 +203,57 @@ def main():
         os.system("cls")
         unit = ""
         if is_admin():
-            devs = list(detect_rm_devices())
-            print("Select an unit drive to rescue (ONLY THE DAMAGED ONE)\n")
-            print("==================================================")
-            print("||\tChoose a drive to repair\t\t||")
-            print("==================================================")
-            print("||\t"+"\t\t||\n||\t".join(getDetailsDrives(devs))+"\t\t||")
-            print("==================================================")
-            unit = str(input("\n>> "))
-            if blank(unit):
-                os.system("cls")
-                print("The unit letter should be given!")
+            while blank(unit) == True:
+                devs = list(detect_rm_devices())
+                if len(devs) < 1:
+                    print("There's not drives to select... Please plug in one.")
+                    key2conti()
+                    return os.system("exit()")
+                print("Select an unit drive to rescue (ONLY THE DAMAGED ONE)\n")
+                print("==================================================")
+                print("||\tChoose a drive to repair\t\t||")
+                print("==================================================")
+                print("||\t"+"\t\t||\n||\t".join(getDetailsDrives(devs))+"\t\t||")
+                print("==================================================")
+                print("\nType 'cancel' to exit/cancel the process.\n")
+                unit = str(input("\n>> "))
+                if unit == "cancel":
+                    os.system("cls")
+                    print("==============================================")
+                    print("The process just got cancelled.")
+                    print("==============================================")
+                    key2conti()
+                    return os.system("exit()")
+                if blank(unit):
+                    os.system("cls")
+                    print("The unit letter should be given!")
+                    key2conti()
+            pathTarget = f"{unit}:\\"
+            if pathTarget not in devs:
+                print("\n==================================================")
+                print("The selected drive to repair doesn't exists...")
                 key2conti()
                 os.system("exit()")
             else:
-                pathTarget = f"{unit}:\\"
-                if pathTarget not in devs:
-                    print("\n==================================================")
-                    print("The selected drive to repair doesn't exists...")
-                    key2conti()
-                    os.system("exit()")
-                else:
-                    print("Starting the fixing process ...")
-                    setTimeout(2.5)
-                    os.system("cls")
-                    os.system(f"chkdsk /F {unit}:")
-                    if os.path.exists(pathTarget):
-                        try:
-                            os.chdir(pathTarget)
-                            os.system(f"start {pathTarget}")
-                            print("The drive is working now!")
-                        except FileNotFoundError as e:
-                            print(f"Error: {e}")
-                            return
-                        except Exception as e:
-                            print(f"Error: {e}")
-                            return
-                    else:
+                print("Starting the fixing process ...")
+                setTimeout(2.5)
+                os.system("cls")
+                os.system(f"chkdsk /F {unit}:")
+                if os.path.exists(pathTarget):
+                    try:
+                        os.chdir(pathTarget)
+                        os.system(f"start {pathTarget}")
+                        print("The drive is working now!")
+                    except FileNotFoundError as e:
+                        print(f"Error: {e}")
                         return
-                    key2conti()
-                    os.system("exit()")
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        return
+                else:
+                    return
+                key2conti()
+                os.system("exit()")
         else:
             os.system("cls")
             print("This app only works with administrator!")
